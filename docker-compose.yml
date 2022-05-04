@@ -1,0 +1,73 @@
+version: '3.1'
+services:
+
+  zookeeper:
+    image: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+    env_file:
+      - zookeeper.env
+    volumes:
+      - zookeeper_data:/data
+
+  kafka1:
+    image: bitnami/kafka
+    ports:
+      - '9091:9092'
+    env_file:
+      - kafka.env
+    environment:
+      - "KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092"
+    volumes:
+      - kafka1_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+  kafka2:
+    image: bitnami/kafka
+    ports:
+      - '9092:9092'
+    env_file:
+      - kafka.env
+    environment:
+      - "KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092"
+    volumes:
+      - kafka2_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+  kafka3:
+    image: bitnami/kafka
+    ports:
+      - '9093:9092'
+    env_file:
+      - kafka.env
+    environment:
+      - "KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9092"
+    volumes:
+      - kafka3_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "7070:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
+    depends_on:
+      - kafka1
+
+volumes:
+  zookeeper_data:
+  zookeeper_datalog:
+  zookeeper_logs:
+  kafka1_data:
+  kafka2_data:
+  kafka3_data:
